@@ -1,0 +1,2 @@
+# FullScreenPhotoView
+TwitterやSlackのように画像タップで画像拡大表示する
