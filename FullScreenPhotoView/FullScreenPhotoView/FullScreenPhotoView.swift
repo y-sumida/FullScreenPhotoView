@@ -8,12 +8,13 @@
 
 import UIKit
 
-class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate {
+class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDelegate {
     // const
     private let screenSize: CGRect = UIScreen.main.bounds
     
     // views
     private var baseView: UIView = UIView()
+    private var imageView: UIImageView!
 
     // state
     var startPanPoint: CGPoint!
@@ -34,7 +35,7 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate {
         self.sendSubview(toBack: baseView)
         baseView.backgroundColor = UIColor.black
         
-        let imageView: UIImageView = UIImageView(image:image)
+        imageView = UIImageView(image:image)
         imageView.contentMode = UIViewContentMode.scaleAspectFit
         imageView.frame = screenFrame
         imageView.isUserInteractionEnabled = true
@@ -42,7 +43,17 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate {
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(FullScreenPhotoView.closeSwipeGesture(_:)))
         panGesture.delegate = self
         imageView.addGestureRecognizer(panGesture)
-        self.addSubview(imageView)
+
+        let scrollView: UIScrollView = UIScrollView(frame: screenFrame)
+        scrollView.minimumZoomScale = 1
+        scrollView.maximumZoomScale = 2
+        scrollView.zoomScale = 1
+        scrollView.contentSize = imageView.bounds.size
+        scrollView.delegate = self
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.addSubview(imageView)
+        self.addSubview(scrollView)
     }
     
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -137,5 +148,9 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate {
             animations: {
                 self.alpha = 0
         }, completion: { _ in self.removeFromSuperview() })
+    }
+
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        return self.imageView
     }
 }
