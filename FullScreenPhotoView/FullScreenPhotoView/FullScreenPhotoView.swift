@@ -123,9 +123,9 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
     private func close(imageView: UIView? = nil, dy: CGFloat? = nil) {
         if let imageView: UIView = imageView, let dy: CGFloat = dy {
             closeImageViewAnimation(imageView: imageView, dy: dy)
-            closeCaptionViewAnimation()
+            closeFullScreenPhotoViewAnimation()
         } else {
-            closeCaptionViewAnimation()
+            closeFullScreenPhotoViewAnimation()
         }
     }
     
@@ -142,7 +142,7 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
         })
     }
     
-    private func closeCaptionViewAnimation() {
+    private func closeFullScreenPhotoViewAnimation() {
         UIView.animate(
             withDuration: 0.3,
             animations: {
