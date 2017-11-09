@@ -15,6 +15,7 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
     // views
     private var baseView: UIView = UIView()
     private var imageView: UIImageView!
+    private var scrollView: UIScrollView!
 
     // state
     var startPanPoint: CGPoint!
@@ -44,7 +45,7 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
         panGesture.delegate = self
         imageView.addGestureRecognizer(panGesture)
 
-        let scrollView: UIScrollView = UIScrollView(frame: screenFrame)
+        scrollView = UIScrollView(frame: screenFrame)
         scrollView.minimumZoomScale = 1
         scrollView.maximumZoomScale = 2
         scrollView.zoomScale = 1
@@ -65,8 +66,9 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
     // 上下スワイプで閉じる
     @objc func closeSwipeGesture(_ gesture: UIPanGestureRecognizer) {
         let point = gesture.location(in: gesture.view?.superview)
-        
+
         guard let imageView = gesture.view else { return }
+        guard scrollView.zoomScale == 1 else { return }
         switch gesture.state {
         case .began:
             startPanPoint = point
