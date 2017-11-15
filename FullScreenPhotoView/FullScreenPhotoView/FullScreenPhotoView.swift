@@ -19,7 +19,8 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
 
     // state
     var startPanPoint: CGPoint!
-    
+    var imageViewOrigin: CGPoint!
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -38,12 +39,19 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
         
         imageView = UIImageView(image:image)
         imageView.contentMode = UIViewContentMode.scaleAspectFit
-        imageView.frame = screenFrame
+        let x = (screenFrame.width - image.size.width) / 2.0
+        let y = (screenFrame.height - image.size.height) / 2.0
+        imageViewOrigin = CGPoint(x:x, y: y)
+        imageView.frame = CGRect(x: imageViewOrigin.x, y: imageViewOrigin.y, width: image.size.width, height: image.size.height)
         imageView.isUserInteractionEnabled = true
 
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(FullScreenPhotoView.closeSwipeGesture(_:)))
         panGesture.delegate = self
         imageView.addGestureRecognizer(panGesture)
+
+        let contentView = UIView(frame: screenFrame)
+        contentView.addSubview(imageView)
+        contentView.addGestureRecognizer(panGesture)
 
         scrollView = UIScrollView(frame: screenFrame)
         scrollView.minimumZoomScale = 1
@@ -53,10 +61,10 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
         scrollView.delegate = self
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.showsVerticalScrollIndicator = false
-        scrollView.addSubview(imageView)
+        scrollView.addSubview(contentView)
         self.addSubview(scrollView)
     }
-    
+
     override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         // 縦スワイプ判定
         let panRecog = gestureRecognizer as! UIPanGestureRecognizer
@@ -67,8 +75,8 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
     @objc func closeSwipeGesture(_ gesture: UIPanGestureRecognizer) {
         let point = gesture.location(in: gesture.view?.superview)
 
-        guard let imageView = gesture.view else { return }
         guard scrollView.zoomScale == 1 else { return }
+
         switch gesture.state {
         case .began:
             startPanPoint = point
@@ -76,7 +84,7 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
         case .changed:
             // 画像を指に追従させる
             let dy = point.y - startPanPoint.y
-            imageView.frame.origin = CGPoint(x: 0, y: dy)
+            imageView.frame.origin = CGPoint(x: imageViewOrigin.x, y: imageViewOrigin.y + dy)
             
             // 移動量に合わせて背景のアルファ値を変更
             let p = screenSize.height / 100
@@ -118,7 +126,7 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
             delay: 0,
             options: .curveEaseOut,
             animations: {
-                imageView.frame.origin = CGPoint(x: 0, y: 0)
+                imageView.frame.origin = self.imageViewOrigin
         }) { _ in }
     }
     
