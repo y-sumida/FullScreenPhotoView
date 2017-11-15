@@ -16,6 +16,7 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
     private var baseView: UIView = UIView()
     private var imageView: UIImageView!
     private var scrollView: UIScrollView!
+    private var contentView: UIView = UIView()
 
     // state
     var startPanPoint: CGPoint!
@@ -49,7 +50,7 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
         panGesture.delegate = self
         imageView.addGestureRecognizer(panGesture)
 
-        let contentView = UIView(frame: screenFrame)
+        contentView.frame = screenFrame
         contentView.addSubview(imageView)
         contentView.addGestureRecognizer(panGesture)
 
@@ -162,5 +163,19 @@ class FullScreenPhotoView: UIView, UIGestureRecognizerDelegate, UIScrollViewDele
 
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return self.imageView
+    }
+
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        let x = (screenSize.width - imageView.frame.size.width) / 2.0
+        let y = (screenSize.height - imageView.frame.size.height) / 2.0
+
+        imageView.frame = CGRect(x: x > 0 ? x : 0, y: y > 0 ? y : 0, width: imageView.frame.size.width, height: imageView.frame.size.height)
+    }
+
+    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+        print(scale)
+        if scale == 1.0 {
+            imageView.frame = CGRect(x: imageViewOrigin.x, y: imageViewOrigin.y, width: imageView.frame.size.width, height: imageView.frame.size.height)
+        }
     }
 }
